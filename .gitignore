@@ -1,0 +1,10 @@
+compile_commands.json
+ent.plist
+holly
+*.holly
+*.log
+uthash-2.4.0/
+scripts/cloc_results
+*/*.py
+*.dSYM
+.cache
