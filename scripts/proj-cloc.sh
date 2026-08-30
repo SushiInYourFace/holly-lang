@@ -1,5 +1,5 @@
 #!/bin/zsh
-PROJECT_DIR="/Users/Noelle/Programming/holly-lang"
+PROJECT_DIR="./"
 HIST_FILE="${PROJECT_DIR}/scripts/cloc_results"
 
 

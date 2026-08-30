@@ -21,6 +21,7 @@ struct Environment{
     Environment *parent;
     VarEntry *var_table;
     bool should_return;
+    bool should_break;
     Value return_val;
 };
 

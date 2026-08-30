@@ -8,3 +8,5 @@ scripts/cloc_results
 */*.py
 *.dSYM
 .cache
+.DS_Store
+scripts

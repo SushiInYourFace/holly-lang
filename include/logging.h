@@ -18,7 +18,7 @@ typedef enum {
     LOG_NODE =      1 << 8       
 } LogLevel;
 
-#define LOG_LEVELS_ENABLED (~0u & ~LOG_TOKEN & ~LOG_TRACE & ~LOG_NODE)
+#define LOG_LEVELS_ENABLED (~0u & ~LOG_TOKEN & ~LOG_TRACE)
 
 
 //funs

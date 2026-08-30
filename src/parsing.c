@@ -14,7 +14,7 @@
 
 static const TokenType start_statement_tokens[] =   
 {TK_DONE,TK_SEMICOLON,TK_INTEGER,TK_ASSIGN,TK_FINAL,TK_FINALIZE,TK_DOUBLE,TK_VARNAME,TK_DISPLAY, 
-TK_IF,TK_FUN_NAME,TK_RETURN, TK_WHILE};
+TK_IF,TK_FUN_NAME,TK_RETURN, TK_WHILE, TK_BREAK};
 static const TokenType var_declare_tokens[] =        {TK_ASSIGN, TK_FINAL};
 static const TokenType var_reassign_tokens[] =      {TK_EQ, TK_PLUS_INPLACE, 
                                                     TK_MINUS_INPLACE, TK_MULT_INPLACE, TK_DIV_INPLACE};
@@ -284,6 +284,14 @@ static TreeNode *makeReturnNode(TreeNode *return_val) {
     return node;
 }
 
+//node that tells a loop to break
+static TreeNode *makeBreakNode() {
+    num_nodes++;
+    TreeNode *node = malloc(sizeof(TreeNode));
+    node->type = NODE_BREAK;
+    return node;
+}
+
 //parse functions
 
 //parse basic data
@@ -433,6 +441,11 @@ static TreeNode *parseReturn(Parser *p) {
     return makeReturnNode(return_val);
 }
 
+static TreeNode *parseBreak(Parser *p) {
+    expectToken(p, TK_BREAK);
+    return makeBreakNode();
+}
+
 static TreeNode *parseStatement(Parser *p) {
     //if else rather than switch here, since some categories overlap. This makes everything easier
     TokenType tok = p_see(p)->type;
@@ -457,6 +470,8 @@ static TreeNode *parseStatement(Parser *p) {
         ret = parseReturn(p);
     } else if (tok == TK_WHILE) {
         ret = parseWhileLoop(p);
+    } else if (tok == TK_BREAK) {
+        ret = parseBreak(p);
     } else if (tok == TK_SEMICOLON) {
         logWarn("Parsed empty condition");
         p_advance(p);
@@ -512,6 +527,7 @@ static TreeNode *parseWhileLoop(Parser *p) {
 //parse a full block of tokens
 static TreeNode *parseBlock(Parser *p, BlockType b_type) {
     TreeNode *node = makeBlockNode();
+    node->block.type = b_type;
     //get done keyword
     TokenType done_tk;
     switch(b_type) {
@@ -641,6 +657,8 @@ void freeNode(TreeNode *node) {
             break;
         case NODE_RETURN:
             freeNode(node->node_return.val);
+            break;
+        case NODE_BREAK:
             break;
     }
     free(node);

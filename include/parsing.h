@@ -51,7 +51,8 @@ typedef enum {
     NODE_CONDITION,
     NODE_FUN_CALL,
     NODE_RETURN,
-    NODE_WHILE_LOOP
+    NODE_WHILE_LOOP,
+    NODE_BREAK
 } NodeType;
 
 typedef struct TreeNode TreeNode; //forward dec for recursion
@@ -75,6 +76,7 @@ struct TreeNode {
             TokenType action;
         } binary;
         struct {
+            BlockType type;
             TreeNode **children;
             size_t max;
             size_t len;

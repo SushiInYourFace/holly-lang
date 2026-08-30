@@ -44,6 +44,7 @@ static char* getErrString(Error e) {
         case ERR_NO_IN_FILE:            return "No input file was provided!";
         case ERR_MATH_ON_STR:           return "Tried to do math on string";
         case ERR_OTHER:                 return "Unknown error!";
+        case ERR_BREAK_NO_LOOP:         return "Encountered a 'break' statement outside of a loop!";
     }
 }
 

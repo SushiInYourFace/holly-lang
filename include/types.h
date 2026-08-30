@@ -52,6 +52,7 @@ typedef enum {
     TK_FINALIZE,
     TK_DISPLAY,
     TK_RETURN,
+    TK_BREAK,
     //items
     TK_PLUS,
     TK_MINUS,

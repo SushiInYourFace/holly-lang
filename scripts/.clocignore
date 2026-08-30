@@ -1,7 +1,0 @@
-include/uthash
-uthash-2.4.0
-.cache
-main.dSYM
-holly.dSYM
-compile_commands.json
-ent.plist

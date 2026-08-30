@@ -1,4 +1,5 @@
 #include "eval.h"
+#include <stdbool.h>
 #include <stdio.h>
 
 #include "errors.h"
@@ -57,7 +58,9 @@ Value eval(TreeNode *node, Environment *env, FunctionEntry *fun_hash) {
             block_env.parent = env;
             block_env.var_table = NULL;
             block_env.should_return = false;
+            block_env.should_break = false;
             block_env.return_val = VALUE_EMPTY;
+            logNode("Parsing block type %d", node->block.type);
             for(size_t i = 0; i < node->block.len; i++) {
                 Value statement = eval(node->block.children[i], &block_env, fun_hash); //intermediate statement for readout
                 char statement_str[VAL_STR_LEN];
@@ -65,10 +68,18 @@ Value eval(TreeNode *node, Environment *env, FunctionEntry *fun_hash) {
                 logNode(
                     "Evaluated item %zu of a length %zu node block, return value %s", 
                     i, node->block.len, statement_str);
-                if(block_env.should_return) {
+                if(block_env.should_return || block_env.should_break) {
                     break;
                 }
             }
+            if(block_env.should_break) { //break logic
+                if(!block_env.parent || node->block.type == BLOCK_FUNCTION) { //functions have param env above
+                    raiseError(ERR_BREAK_NO_LOOP); //got to top level without encountering a loop
+                }
+                block_env.parent->should_break = true; //flag will be reset by the while loop
+                cleanEnv(&block_env);
+                return VALUE_EMPTY;
+            } //if no break, parse as a return
             if(block_env.parent) { //no return value if inner block
                 cleanEnv(&block_env);
                 logNode("Evaluated inner block node");
@@ -138,6 +149,16 @@ Value eval(TreeNode *node, Environment *env, FunctionEntry *fun_hash) {
                 eval(node->while_loop.body, env, fun_hash);
                 num_iters++;
                 w_should_run = eval(node->while_loop.condition, env, fun_hash);
+                //handle returns
+                if(env->should_return) {
+                    env->parent->should_return = true;
+                    env->parent->return_val = env->return_val;
+                    return VALUE_EMPTY;
+                }
+                if(env->should_break) {
+                    env->should_break = false; //prevent it from leaking higher
+                    return VALUE_EMPTY;
+                }
             }
             logDebug("Iterated a while loop %d times", num_iters);
             if(num_iters >= MAX_LOOP_ITERS) sendWarning(WARN_MAX_LOOP_ITERS);
@@ -164,6 +185,7 @@ Value eval(TreeNode *node, Environment *env, FunctionEntry *fun_hash) {
                 .parent = NULL, //no parent variables in fun calls
                 .var_table = NULL,
                 .should_return = false,
+                .should_break = false,
                 .return_val = VALUE_EMPTY
             };
 
@@ -188,6 +210,10 @@ Value eval(TreeNode *node, Environment *env, FunctionEntry *fun_hash) {
             logNode("Encountered a return call");
             env->should_return = true;
             env->return_val = eval(node->node_return.val, env, fun_hash);
+            return VALUE_EMPTY;
+        case(NODE_BREAK):
+            logNode("Encountered a break node");
+            env->should_break = true;
             return VALUE_EMPTY;
 
         
