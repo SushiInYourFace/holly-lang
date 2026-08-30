@@ -21,6 +21,8 @@ void valueToString(Value val, char* buf, size_t size) {
         case(VAL_INVALID):
             snprintf(buf, size, "VAL_INVALID");
             break;
+        case(VAL_VOID):
+            snprintf(buf, size, "void");
     }
 }
 

@@ -4,7 +4,6 @@
 
 #include "errors.h"
 #include "logging.h"
-#include "parsing.h"
 #include "types.h"
 #include "values.h"
 #include "functions.h"
@@ -16,6 +15,7 @@ static void cleanEnv(Environment *env) {
     HASH_ITER(hh, env->var_table, cur, tmp) {
         count++;
         HASH_DEL(env->var_table, cur);
+        freeValue(cur->value);
         free(cur);  
     }
     logNode("Freed %d var items", count);

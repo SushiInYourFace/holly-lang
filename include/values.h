@@ -5,9 +5,10 @@
 extern const Value VALUE_EMPTY;
 extern const Value VALUE_TRUE;
 extern const Value VALUE_FALSE;
+extern const Value VALUE_VOID;
 
-
-
+//frees any pointer that may be held in a value object
+void freeValue(Value in);
 
 //get a string for a value type
 const char* getValueTypeString(ValueType v);

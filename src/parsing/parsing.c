@@ -1,16 +1,10 @@
-#include "parsing.h"
+#include "parsing/parsing.h"
 #include "logging.h"
 #include "types.h"
 #include "utils.h"
 #include "errors.h"
 #include "functions.h"
-#include <_string.h>
-#include <stdbool.h>
-#include <stddef.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <sys/resource.h>
+#include "values.h"
 
 static const TokenType start_statement_tokens[] =   
 {TK_DONE,TK_SEMICOLON,TK_INTEGER,TK_ASSIGN,TK_FINAL,TK_FINALIZE,TK_DOUBLE,TK_VARNAME,TK_DISPLAY, 
@@ -437,7 +431,13 @@ static TreeNode *parseFunCall(Parser *p) {
 
 static TreeNode *parseReturn(Parser *p) {
     expectToken(p, TK_RETURN);
-    TreeNode *return_val = parseExpression(p); //figure out what is actually being returned
+    //may or may not have value attached
+    TreeNode *return_val;
+    if(p_see(p)->type == TK_SEMICOLON) {
+        return_val = makeValueNode(VALUE_VOID);
+    } else {
+        return_val = parseExpression(p); //figure out what is actually being returned
+    }
     return makeReturnNode(return_val);
 }
 
@@ -604,7 +604,7 @@ void freeNode(TreeNode *node) {
 
     switch(node->type) {
         case NODE_VALUE: 
-            if(node->value.type == VAL_STRING) free(node->value.val_str);
+            freeValue(node->value);
             break;
         case NODE_BINARY:
             freeNode(node->binary.left); //free left subtree

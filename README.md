@@ -8,7 +8,7 @@ Holly is whitespace and linebreak neutral, requiring semicolons after every stat
 ### Comments
 All Holly comments begin with `~`. Any text following a tilde until the end of the line will be treated as a comment
 
-### Variables
+### Variables and Types
 Holly requires every variable to begin with a prefix indicating type. Current primitives are:
 - <u>Integers</u>: Prefixed with `i_`, stored internally as `int64_t`. 
 - <u>Floats</u>: Prefixed with `f_`, stored internally as `double`
@@ -16,6 +16,7 @@ Holly requires every variable to begin with a prefix indicating type. Current pr
     - Unlike in C, booleans cannot be used in math operations, and do not evaluate to 1 or 0. 
 - <u>Strings</u>: Prefixed with `s_`, stored internally as `char*`.
     - There is currently no method to modify, index, or manipulate strings. 
+- <u>Void</u>: Used for functions with no return, prefixed with `v:`. It is not possible to assign variables with type `void`.
 
 
 Variables are assigned using the `assign` keyword. They can be declared `final` on assignment, or set that way later using `finalize`. 

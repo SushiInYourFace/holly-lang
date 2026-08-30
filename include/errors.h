@@ -40,6 +40,7 @@ typedef enum {
     ERR_NO_IN_FILE,
     ERR_MATH_ON_STR,
     ERR_BREAK_NO_LOOP,
+    ERR_OP_ON_VOID,
     ERR_OTHER
 } Error;
 

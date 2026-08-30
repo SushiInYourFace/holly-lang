@@ -1,6 +1,7 @@
 #include "errors.h"
 #include "logging.h"
 #include "utils.h"
+#include "parsing/parsing.h"
 #include "variables.h"
 
 

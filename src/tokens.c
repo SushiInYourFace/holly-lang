@@ -3,8 +3,6 @@
 #include "types.h"
 #include "utils.h"
 #include <_ctype.h>
-#include <_stdio.h>
-#include <_string.h>
 #include <ctype.h>
 #include <stdbool.h>
 #include <stdio.h>

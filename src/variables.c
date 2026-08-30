@@ -9,7 +9,8 @@ const TypePrefix type_prefixes[] = {
     {'i',   VAL_INT},
     {'f',   VAL_DOUBLE}, //Holly floats are handled as doubles internally
     {'b',   VAL_BOOL},
-    {'s', VAL_STRING}
+    {'s', VAL_STRING},
+    {'v',   VAL_VOID}
 };
 
 const size_t type_prefixes_len = ARRAY_LEN(type_prefixes);
@@ -53,10 +54,15 @@ void addVarToHash(Environment *env, char* var_name, Value var_val, bool final) {
     if(getVarTypeFromName(var_name) != var_val.type) {
         raiseError(ERR_MISMATCH_PREFIX);
     }
-    //if var doesn't exist, make it!
+    //create new copy if string
+    Value val_copy = var_val;
+    if(var_val.type == VAL_STRING) {
+        val_copy.val_str = strdup(var_val.val_str); //this is no longer owned by tree
+    }
+    //make actual var
     var_hash = malloc(sizeof(VarEntry)); //make our new hash
-    var_hash->var_name = var_name; //this is still owned by the tree
-    var_hash->value = var_val;
+    var_hash->var_name = var_name; //var name is owned by tree
+    var_hash->value = val_copy;
     var_hash->final = final;
     HASH_ADD_KEYPTR(hh, env->var_table, var_hash->var_name, strlen(var_hash->var_name), var_hash); //add the variable to the hash
 }
@@ -73,7 +79,13 @@ void updateVarValue(Environment *env, char* var_name, Value new_val) {
     if(!entry) raiseError(ERR_UNASSIGNED_VAR);
     if(entry->final) raiseError(ERR_MODIFY_FINAL_VAR);
     if(entry->value.type != new_val.type) raiseError(ERR_MISMATCH_PREFIX);
-    entry->value = new_val;
+    //handle malloc()ed string data
+    Value new_val_copy = new_val;
+    if(new_val.type == VAL_STRING) {
+        free(entry->value.val_str);
+        new_val_copy.val_str = strdup(new_val.val_str);
+    }
+    entry->value = new_val_copy;
 }
 
 
