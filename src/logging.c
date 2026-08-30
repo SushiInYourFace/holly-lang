@@ -90,3 +90,12 @@ void logNode(const char* format, ...) {
     va_end(args);
 }
 
+void displayHelpText() {
+    printf(
+        "\n"
+        "Usage: holly [options] -f <path/to/source.holly>\n"
+        "Options: \n"
+        "-d     Delay for two seconds before finishing execution. This is useful mainly for leak testing and debuggers\n"
+    );
+}
+

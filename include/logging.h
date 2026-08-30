@@ -34,3 +34,6 @@ void logInfo(const char* format, ...);
 void logWarn(const char* format, ...);
 void logToken(const char* format, ...);
 void logNode(const char* format, ...);
+
+//help text
+void displayHelpText();

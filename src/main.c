@@ -11,10 +11,11 @@
 int main(int argc, char** argv) {
     //options
     bool delay = false;
-    int opt = 5 * 5;
+    int opt;
     char *in_file = NULL;
-    while((opt = getopt(argc, argv, "df:")) != -1) {
+    while((opt = getopt(argc, argv, "hdf:")) != -1) {
         switch (opt) {
+            case 'h': displayHelpText(); exit(0);
             case 'd': delay = true; break;
             case 'f': in_file = optarg; break;
         
