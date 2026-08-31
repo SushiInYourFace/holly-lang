@@ -45,6 +45,9 @@ static char* getErrString(Error e) {
         case ERR_MATH_ON_STR:           return "Tried to do math on string";
         case ERR_OTHER:                 return "Unknown error!";
         case ERR_OP_ON_VOID:            return "Tried to use a 'void' value for some type of operation!";
+        case ERR_MATH_ON_ARRAY:         return "Holly does not currently support math operations on entire arrays";
+        case ERR_REF_UNSET:             return "Attempted to reference an unset value!";
+        case ERR_UNSET_FINAL:           return "Attempted to declare a 'final' variable without assigning a value!";
         case ERR_BREAK_NO_LOOP:         return "Encountered a 'break' statement outside of a loop!";
     }
 }

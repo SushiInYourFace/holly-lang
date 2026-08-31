@@ -2,6 +2,7 @@
 #include <stdarg.h>
 
 #include "logging.h"
+#include "types.h"
 
 void valueToString(Value val, char* buf, size_t size) {
     switch(val.type) {
@@ -23,6 +24,8 @@ void valueToString(Value val, char* buf, size_t size) {
             break;
         case(VAL_VOID):
             snprintf(buf, size, "void");
+        case(VAL_UNSET):
+            snprintf(buf, size, "array");
     }
 }
 

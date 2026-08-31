@@ -84,6 +84,7 @@ struct TreeNode {
         struct {
             char* name;
             bool final;
+            bool set;
             TreeNode* val;
         } var_assign;
         struct {

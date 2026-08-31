@@ -6,6 +6,7 @@ extern const Value VALUE_EMPTY;
 extern const Value VALUE_TRUE;
 extern const Value VALUE_FALSE;
 extern const Value VALUE_VOID;
+extern const Value VALUE_UNSET;
 
 //frees any pointer that may be held in a value object
 void freeValue(Value in);

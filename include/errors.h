@@ -41,6 +41,9 @@ typedef enum {
     ERR_MATH_ON_STR,
     ERR_BREAK_NO_LOOP,
     ERR_OP_ON_VOID,
+    ERR_MATH_ON_ARRAY,
+    ERR_REF_UNSET,
+    ERR_UNSET_FINAL,
     ERR_OTHER
 } Error;
 

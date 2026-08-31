@@ -94,6 +94,11 @@ Value eval(TreeNode *node, Environment *env, FunctionEntry *fun_hash) {
             return ret;
         
         case(NODE_VAR_ASSIGN):
+            if(!node->var_assign.set) { //handle declare without set
+                if(node->var_assign.final) raiseError(ERR_UNSET_FINAL); //can't declare final as unset
+                addUnsetVarToHash(env, node->var_assign.name); //varname owned by tree still
+                return VALUE_VOID;
+            }
             Value assign = eval(node->var_assign.val, env, fun_hash);
             //varname is still owned by tree
             addVarToHash(env, node->var_assign.name, assign, node->var_assign.final);

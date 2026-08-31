@@ -180,13 +180,14 @@ static TreeNode *makeBlockNode() {
 }
 
 //make a node that assigns a variable to an expression
-static TreeNode *makeVarAssignNode(char* var_name, TreeNode *value_exp, bool is_final) {
+static TreeNode *makeVarAssignNode(char* var_name, TreeNode *value_exp, bool is_final, bool is_set) {
     num_nodes++;
     TreeNode *node = malloc(sizeof(TreeNode));
     node->type = NODE_VAR_ASSIGN;
     node->var_assign.name = var_name;
     node->var_assign.val = value_exp;
     node->var_assign.final = is_final;
+    node->var_assign.set = is_set;
     logNode("New var assign node");
     return node;
 }
@@ -356,14 +357,17 @@ static TreeNode *parseVarAssign(Parser *p) {
     Token *name_tk = p_advance(p);
     if(name_tk->type != TK_VARNAME) raiseError(ERR_EXP_VARNAME); 
     char *varname = strdup(name_tk->string); //detatch from the token list
-    //bool values need the next token parsed as a primary
     TreeNode *expression;
-    if(p_see(p)->type == TK_BOOL) {
+    bool is_set = true; //whether the variable is being set
+    if(p_see(p)->type == TK_SEMICOLON) { //declare without setting
+        expression = NULL;
+        is_set = false;
+    } else if(p_see(p)->type == TK_BOOL) { //bools parse as a primary
         expression = parsePrimary(p);
     } else {
         expression = parseExpression(p); //get the expression the var will be set to
     }
-    return makeVarAssignNode(varname, expression, is_final);
+    return makeVarAssignNode(varname, expression, is_final, is_set);
 }
 
 //TODO: slim down

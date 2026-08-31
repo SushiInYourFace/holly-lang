@@ -23,7 +23,8 @@ typedef enum {
     VAL_BOOL,
     VAL_STRING,
     VAL_INVALID,
-    VAL_VOID
+    VAL_VOID,
+    VAL_UNSET
 } ValueType;
 
 typedef struct {

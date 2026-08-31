@@ -37,6 +37,8 @@ extern const size_t type_prefixes_len;
 
 //add a variable to the var hash
 void addVarToHash(Environment *env, char* var_name, Value var_val, bool final);
+//add a variable to the env WITHOUT setting a value
+void addUnsetVarToHash(Environment *env, char* var_name);
 //change a non-final var into a final one
 void finalizeVar(Environment *env, char* var_name);
 //update the value of a var

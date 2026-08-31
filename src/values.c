@@ -10,6 +10,7 @@ const Value VALUE_EMPTY = {.type = VAL_INT, .val_int = 0};
 const Value VALUE_VOID = {.type = VAL_VOID};
 const Value VALUE_TRUE = {.type = VAL_BOOL, .val_bool = true};
 const Value VALUE_FALSE = {.type = VAL_BOOL, .val_bool = false};
+const Value VALUE_UNSET = {.type = VAL_UNSET};
 
 static inline double valAsDouble(Value v) { //reminder that all float values are stored internally as doubles
     if(v.type == VAL_BOOL) raiseError(ERR_TRY_CAST_BOOL); //no doing math on bools!!
@@ -25,7 +26,15 @@ const char* getValueTypeString(ValueType v) {
         case VAL_STRING:    return "VAL_STRING";
         case VAL_VOID:      return "VAL_VOID";
         case VAL_INVALID:   return "VAL_INVALID";
+        case VAL_UNSET:     return "VAL_UNSET";
     }
+}
+
+static void catchInvalidMath(ValueType left, ValueType right) {
+    if(left == VAL_BOOL || right == VAL_BOOL) raiseError(ERR_MATH_ON_BOOL);
+    if(left == VAL_STRING || right == VAL_STRING) raiseError(ERR_MATH_ON_STR);
+    if(left == VAL_VOID || right == VAL_VOID) raiseError(ERR_OP_ON_VOID);
+    if(left == VAL_UNSET || right == VAL_UNSET) raiseError(ERR_REF_UNSET);
 }
 
 void freeValue(Value in) {
@@ -35,9 +44,7 @@ void freeValue(Value in) {
 }
 
 Value addValues(Value left, Value right) {
-    if(left.type == VAL_BOOL || right.type == VAL_BOOL) raiseError(ERR_MATH_ON_BOOL);
-    if(left.type == VAL_STRING || right.type == VAL_STRING) raiseError(ERR_MATH_ON_STR);
-    if(left.type == VAL_VOID || right.type == VAL_VOID) raiseError(ERR_OP_ON_VOID);   
+    catchInvalidMath(left.type, right.type);
     if(left.type != right.type) {
         sendWarning(WARN_MIXING_VAR_TYPES);
         double d_left = valAsDouble(left);
@@ -49,9 +56,7 @@ Value addValues(Value left, Value right) {
 }
 
 Value subValues(Value left, Value right) {
-    if(left.type == VAL_BOOL || right.type == VAL_BOOL) raiseError(ERR_MATH_ON_BOOL);
-    if(left.type == VAL_STRING || right.type == VAL_STRING) raiseError(ERR_MATH_ON_STR);
-    if(left.type == VAL_VOID || right.type == VAL_VOID) raiseError(ERR_OP_ON_VOID);   
+    catchInvalidMath(left.type, right.type);
     if(left.type != right.type) {
         sendWarning(WARN_MIXING_VAR_TYPES);
         double d_left = valAsDouble(left);
@@ -63,9 +68,7 @@ Value subValues(Value left, Value right) {
 }
 
 Value multValues(Value left, Value right) {
-    if(left.type == VAL_BOOL || right.type == VAL_BOOL) raiseError(ERR_MATH_ON_BOOL);
-    if(left.type == VAL_STRING || right.type == VAL_STRING) raiseError(ERR_MATH_ON_STR);
-    if(left.type == VAL_VOID || right.type == VAL_VOID) raiseError(ERR_OP_ON_VOID);   
+    catchInvalidMath(left.type, right.type);
     if(left.type != right.type) {
         sendWarning(WARN_MIXING_VAR_TYPES);
         double d_left = valAsDouble(left);
@@ -77,9 +80,7 @@ Value multValues(Value left, Value right) {
 }
 
 Value divValues(Value left, Value right) {
-    if(left.type == VAL_BOOL || right.type == VAL_BOOL) raiseError(ERR_MATH_ON_BOOL);
-    if(left.type == VAL_STRING || right.type == VAL_STRING) raiseError(ERR_MATH_ON_STR);
-    if(left.type == VAL_VOID || right.type == VAL_VOID) raiseError(ERR_OP_ON_VOID);   
+    catchInvalidMath(left.type, right.type);   
     if(left.type != right.type) {
         sendWarning(WARN_MIXING_VAR_TYPES);
         double d_left = valAsDouble(left);
@@ -91,9 +92,7 @@ Value divValues(Value left, Value right) {
 }
 
 Value modValues(Value left, Value right) {
-    if(left.type == VAL_BOOL || right.type == VAL_BOOL) raiseError(ERR_MATH_ON_BOOL);
-    if(left.type == VAL_STRING || right.type == VAL_STRING) raiseError(ERR_MATH_ON_STR);
-    if(left.type == VAL_VOID || right.type == VAL_VOID) raiseError(ERR_OP_ON_VOID);    
+    catchInvalidMath(left.type, right.type); 
     if(left.type != right.type) {
         sendWarning(WARN_MIXING_VAR_TYPES);
         double d_left = valAsDouble(left);
@@ -116,6 +115,9 @@ bool isTruthy(Value val) {
             return (val.val_str); //if a pointer has been set, it is truthy
         case(VAL_VOID):
             return false;
+        case(VAL_UNSET):
+            raiseError(ERR_REF_UNSET);
+            return false; //unreachable
         case(VAL_INVALID):
             return (false); //fallback
     }
@@ -130,6 +132,7 @@ bool isTruthy(Value val) {
         case(VAL_DOUBLE): (result_dest) = ((left).val_float op (right).val_float);  \
             break;                                                                  \
         case(VAL_STRING): raiseError(ERR_MATH_ON_STR);                              \
+        case(VAL_UNSET):   raiseError(ERR_REF_UNSET);                               \
         case(VAL_VOID):     raiseError(ERR_OP_ON_VOID);                             \
         case(VAL_INVALID): raiseError(ERR_INVALID_NUM); exit(1);                    \
     }
