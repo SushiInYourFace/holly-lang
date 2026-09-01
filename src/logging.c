@@ -25,7 +25,7 @@ void valueToString(Value val, char* buf, size_t size) {
         case(VAL_VOID):
             snprintf(buf, size, "void");
         case(VAL_UNSET):
-            snprintf(buf, size, "array");
+            snprintf(buf, size, "unset");
     }
 }
 
@@ -44,6 +44,7 @@ static void logMessage(LogLevel level, const char *format, va_list args) {
         case LOG_TRACE:     level_string = "trace";     break;
         case LOG_TOKEN:     level_string = "token";     break;
         case LOG_NODE:      level_string = "node";      break;
+        case LOG_DATA:      level_string = "data";      break;
         default:            level_string = "???";       break;
     }
 
@@ -92,6 +93,13 @@ void logNode(const char* format, ...) {
     va_list args;
     va_start(args, format);
     logMessage(LOG_NODE, format, args);
+    va_end(args);
+}
+
+void logData(const char* format, ...) {
+    va_list args;
+    va_start(args, format);
+    logMessage(LOG_DATA, format, args);
     va_end(args);
 }
 

@@ -5,6 +5,7 @@
 #include "utils.h"
 #include "values.h"
 #include <stddef.h>
+#include <stdlib.h>
 #include <string.h>
  
 const TypePrefix type_prefixes[] = {
@@ -46,6 +47,54 @@ static VarEntry* findVarEntry(Environment *env, char* var_name) {
     return ret;
 }
 
+//add a string pointer to the environment storage, ensuring that it will be properly freed when the environment is cleaned
+static void addStrToEnv(Environment *env, char* string) {
+    if(env->strings.len >= env->strings.max) { //grow if needed
+        size_t new_max = env->strings.max * 2; //double capacity
+        char** new_arr = realloc(env->strings.arr, new_max);
+        if(!new_arr) raiseError(ERR_MEM_ALLOC);
+        env->strings.arr = new_arr;
+        env->strings.max = new_max;
+    }
+    env->strings.arr[env->strings.len] = string;
+    env->strings.len += 1; 
+}
+
+void addValToEnv(Environment *env, Value in) {
+    if(in.type == VAL_STRING) {
+        addStrToEnv(env, in.val_str);
+    }
+}
+
+void initEnv(Environment *env, Environment *parent) {
+    env->parent = parent;
+    env->return_val = VALUE_VOID;
+    env->should_return = false;
+    env->should_break = false;
+    env->var_table = NULL; //this is set up elsewhere
+    //init strings
+    env->strings.arr = malloc(ENV_STRING_ARR_LEN * sizeof(char*));
+    env->strings.len = 0;
+    env->strings.max = ENV_STRING_ARR_LEN;
+}
+
+void cleanEnv(Environment *env) {
+    VarEntry *cur, *tmp; //need these for iter
+    uint16_t count = 0;
+    HASH_ITER(hh, env->var_table, cur, tmp) {
+        count++;
+        HASH_DEL(env->var_table, cur);
+        free(cur);  
+    }
+    logNode("Freed %d var items", count);
+    for(size_t i = 0; i < env->strings.len; i++) { //free stored strings
+        free(env->strings.arr[i]);
+    }
+    logData("Freed %zu stored strings", env->strings.len);
+    free(env->strings.arr);
+}
+
+
 void addVarToHash(Environment *env, char* var_name, Value var_val, bool final) {
     //check if var exists
     VarEntry *var_hash = findVarEntry(env, var_name);
@@ -59,7 +108,7 @@ void addVarToHash(Environment *env, char* var_name, Value var_val, bool final) {
     //create new copy if string
     Value val_copy = var_val;
     if(var_val.type == VAL_STRING) {
-        val_copy.val_str = strdup(var_val.val_str); //this is no longer owned by tree
+        val_copy.val_str = var_val.val_str; //this is owned by whomever
     }
     //make actual var
     var_hash = malloc(sizeof(VarEntry)); //make our new hash
@@ -98,8 +147,7 @@ void updateVarValue(Environment *env, char* var_name, Value new_val) {
     //handle malloc()ed string data
     Value new_val_copy = new_val;
     if(new_val.type == VAL_STRING) {
-        if(entry->value.type != VAL_UNSET) free(entry->value.val_str); //if value was previously unset, don't have to free old string
-        new_val_copy.val_str = strdup(new_val.val_str);
+        new_val_copy.val_str = new_val.val_str;
     }
     entry->value = new_val_copy;
 }

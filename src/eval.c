@@ -9,19 +9,6 @@
 #include "functions.h"
 #include "variables.h"
 
-static void cleanEnv(Environment *env) {
-    VarEntry *cur, *tmp; //need these for iter
-    uint16_t count = 0;
-    HASH_ITER(hh, env->var_table, cur, tmp) {
-        count++;
-        HASH_DEL(env->var_table, cur);
-        freeValue(cur->value);
-        free(cur);  
-    }
-    logNode("Freed %d var items", count);
-}
-
-
 Value eval(TreeNode *node, Environment *env, FunctionEntry *fun_hash) {
     switch(node->type) { //evaluate differently based on what sort of node we're dealing with
         case(NODE_VALUE):
@@ -35,14 +22,17 @@ Value eval(TreeNode *node, Environment *env, FunctionEntry *fun_hash) {
         case(NODE_BINARY):
             Value left = eval(node->binary.left, env, fun_hash); //evaluate the left hand side of the tree
             Value right = eval(node->binary.right, env, fun_hash); //ditto
+            Value out = VALUE_VOID;
             switch(node->binary.action) {
-                case TK_PLUS: return addValues(left, right);
-                case TK_MINUS: return subValues(left, right);
-                case TK_MULT: return multValues(left, right);
-                case TK_DIV: return divValues(left, right);
-                case TK_MODULO: return modValues(left, right);
+                case TK_PLUS: out = addValues(left, right);     break;
+                case TK_MINUS: out = subValues(left, right);   break;  
+                case TK_MULT: out = multValues(left, right);   break;  
+                case TK_DIV: out = divValues(left, right);     break;
+                case TK_MODULO: out = modValues(left, right);  break;
                 default: raiseError(ERR_UNKNOWN_BINARY_OP);
             }
+            addValToEnv(env, out); //ensure the value is added to the hash to properly be cleaned
+            return out;
         case(NODE_VAR_REFERENCE):
             //if var exists, send the value
             Value var_val = getVarValue(env, node->var_reference.name);
@@ -55,11 +45,7 @@ Value eval(TreeNode *node, Environment *env, FunctionEntry *fun_hash) {
             //eval each node inside the block
             //first set up the variable environment
             Environment block_env;
-            block_env.parent = env;
-            block_env.var_table = NULL;
-            block_env.should_return = false;
-            block_env.should_break = false;
-            block_env.return_val = VALUE_EMPTY;
+            initEnv(&block_env, env);
             logNode("Parsing block type %d", node->block.type);
             for(size_t i = 0; i < node->block.len; i++) {
                 Value statement = eval(node->block.children[i], &block_env, fun_hash); //intermediate statement for readout
@@ -81,15 +67,18 @@ Value eval(TreeNode *node, Environment *env, FunctionEntry *fun_hash) {
                 return VALUE_EMPTY;
             } //if no break, parse as a return
             if(block_env.parent) { //no return value if inner block
+                Value ret = dupVal(block_env.return_val); //grab the value before env is cleaned
+                addValToEnv(env, ret); //add it to env so it can be freed
                 cleanEnv(&block_env);
                 logNode("Evaluated inner block node");
                 //pass a return down the line
                 env->should_return = block_env.should_return;
-                env->return_val = block_env.return_val; //pass return down the chain
+                env->return_val = ret; //pass return down the chain
                 return VALUE_EMPTY;
             }
             //get return val from the block if it was the top level
-            Value ret = block_env.return_val;
+            Value ret = dupVal(block_env.return_val);
+            if(env) addValToEnv(env, ret); //add value to env. Don't add if there's no parent
             cleanEnv(&block_env); //cleanup the var hash
             return ret;
         
@@ -186,14 +175,8 @@ Value eval(TreeNode *node, Environment *env, FunctionEntry *fun_hash) {
             if(fun->params.count != node->fun_call.params.count) {
                 raiseErrorWithCtx(ERR_INVALID_NUM_PARAMS, CTX_2SIZE, fun->params.count, node->fun_call.params.count);
             }
-            Environment fun_env = {
-                .parent = NULL, //no parent variables in fun calls
-                .var_table = NULL,
-                .should_return = false,
-                .should_break = false,
-                .return_val = VALUE_EMPTY
-            };
-
+            Environment fun_env;
+            initEnv(&fun_env, NULL); //funs can't see parent env
             for(size_t i = 0; i < fun->params.count; i++) { //add params to the fun environment
                 addVarToHash(
                     &fun_env,  //new param env
@@ -203,7 +186,10 @@ Value eval(TreeNode *node, Environment *env, FunctionEntry *fun_hash) {
                 );
             }
             eval(fun->fun_block, &fun_env, fun_hash); //return gets other functions, but not variables
-            Value fun_ret = fun_env.return_val; //read the return value from the function environment
+            //NOTE: functions are not top level because of the param environment. So if their returns are allocated data, 
+            //      they need to be detached
+            Value fun_ret = dupVal(fun_env.return_val); //read the return value from the function environment
+            addValToEnv(env, fun_ret); //if the return has allocated data, needs to be added to parent
             cleanEnv(&fun_env);
             //check ret against declared ret type
             if(fun_ret.type != fun->return_type) {
@@ -215,7 +201,7 @@ Value eval(TreeNode *node, Environment *env, FunctionEntry *fun_hash) {
             logNode("Encountered a return call");
             env->should_return = true;
             env->return_val = eval(node->node_return.val, env, fun_hash);
-            return VALUE_EMPTY;
+            return VALUE_VOID;
         case(NODE_BREAK):
             logNode("Encountered a break node");
             env->should_break = true;

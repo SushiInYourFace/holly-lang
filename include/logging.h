@@ -15,7 +15,8 @@ typedef enum {
     LOG_TRACE =     1 << 6,
     //specific categories
     LOG_TOKEN =     1 << 7,
-    LOG_NODE =      1 << 8       
+    LOG_NODE =      1 << 8,
+    LOG_DATA =      1 << 9       
 } LogLevel;
 
 #define LOG_LEVELS_ENABLED (~0u & ~LOG_TOKEN & ~LOG_TRACE)
@@ -34,6 +35,6 @@ void logInfo(const char* format, ...);
 void logWarn(const char* format, ...);
 void logToken(const char* format, ...);
 void logNode(const char* format, ...);
-
+void logData(const char* format, ...);
 //help text
 void displayHelpText();

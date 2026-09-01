@@ -7,6 +7,7 @@
 #include "tokens.h"
 #include "utils.h"
 #include "functions.h"
+#include "values.h"
 
 int main(int argc, char** argv) {
     //options
@@ -68,6 +69,7 @@ int main(int argc, char** argv) {
     valueToString(ret_val, ret_val_str, VAL_STR_LEN);
     logInfo("Tree returned value of %s", ret_val_str);
     printf("Program finished with return %s\n", ret_val_str);
+    freeValue(ret_val);
     logInfo("Program execution took %.4f us", getElapsedUs(start, done_eval));
     if(delay) {
         sleep(2);

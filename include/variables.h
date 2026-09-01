@@ -4,6 +4,8 @@
 #include "uthash/uthash.h"
 #include <stdbool.h>
 
+#define ENV_STRING_ARR_LEN (16) //how much space gets allocated for string storage when a new environment is created
+
 //forward declare type prefixes
 
 //hashmap layout for variables
@@ -23,6 +25,11 @@ struct Environment{
     bool should_return;
     bool should_break;
     Value return_val;
+    struct {
+        char** arr;
+        size_t len;
+        size_t max;
+    } strings;
 };
 
 typedef struct EnvSketch EnvSketch;
@@ -35,6 +42,10 @@ typedef struct {
 extern const TypePrefix type_prefixes[];
 extern const size_t type_prefixes_len;
 
+//set up an environment
+void initEnv(Environment *env, Environment *parent);
+//clean an environment, removing all variables and string storage
+void cleanEnv(Environment *env);
 //add a variable to the var hash
 void addVarToHash(Environment *env, char* var_name, Value var_val, bool final);
 //add a variable to the env WITHOUT setting a value

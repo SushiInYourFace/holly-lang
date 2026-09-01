@@ -1,5 +1,6 @@
 #pragma once
 #include "types.h"
+#include "variables.h"
 
 //const values
 extern const Value VALUE_EMPTY;
@@ -11,6 +12,10 @@ extern const Value VALUE_UNSET;
 //frees any pointer that may be held in a value object
 void freeValue(Value in);
 
+//duplicate a value, duplicating malloc()ed data. It is caller's responsibility to free the new pointer
+Value dupVal(Value in);
+//Check whether a value has malloc()ed data, and add it to the environment if so
+void addValToEnv(Environment *env, Value in);
 //get a string for a value type
 const char* getValueTypeString(ValueType v);
 //add two values

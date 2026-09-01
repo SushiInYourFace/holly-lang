@@ -1,9 +1,11 @@
 #include "values.h"
 #include "errors.h"
 #include "types.h"
+#include <_string.h>
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 
 const Value VALUE_EMPTY = {.type = VAL_INT, .val_int = 0};
@@ -43,7 +45,22 @@ void freeValue(Value in) {
     }
 }
 
+Value dupVal(Value in) {
+    Value ret = in;
+    if(in.type == VAL_STRING) {
+        ret.val_str = strdup(in.val_str);
+    }
+    return ret;
+}
+
 Value addValues(Value left, Value right) {
+    //string concat
+    if(left.type == VAL_STRING && right.type == VAL_STRING) {
+        char* out = malloc(strlen(left.val_str) + strlen(right.val_str) + 1); //new char buffer
+        strcpy(out, left.val_str);
+        strcat(out, right.val_str);
+        return (Value){.type = VAL_STRING, .val_str = out};
+    }
     catchInvalidMath(left.type, right.type);
     if(left.type != right.type) {
         sendWarning(WARN_MIXING_VAR_TYPES);
