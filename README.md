@@ -27,6 +27,8 @@ final i_bar 8; ~declare a constant
 i_foo = i_bar * 4; ~reassign a variable
 i_foo -= 10; ~or do it in place
 finalize i_foo; ~i_foo is now a constant
+assign i_unset; ~can declare variables without setting them
+i_unset = 5; ~and then set them later
 ```
 ### Control flow
 Holly does not use `{braces}` for control flow. The syntax is instead closer to bash or other shell scripting languages.
@@ -82,4 +84,4 @@ done;
 
 ## Attributions
 
-The Holly language incorporates [UThash](https://troydhanson.github.io/uthash/) for storing functions and variables
+The Holly language incorporates [UThash](https://troydhanson.github.io/uthash/) for variable and function storage

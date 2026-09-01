@@ -100,6 +100,7 @@ void raiseErrorWithCtx(Error e, ErrCtx p, ...) {
                 va_arg(args, size_t));
             break;           
     }
+    va_end(args);
     exit(1);
 }
 

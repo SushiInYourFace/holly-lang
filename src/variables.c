@@ -83,6 +83,7 @@ void addUnsetVarToHash(Environment *env, char* var_name) {
 void finalizeVar(Environment *env, char* var_name) {
     VarEntry *entry = findVarEntry(env, var_name);
     if(!entry) raiseError(ERR_UNASSIGNED_VAR);
+    if(entry->value.type == VAL_UNSET) raiseError(ERR_UNSET_FINAL);
     if(entry->final) sendWarning(WARN_VAR_ALREADY_FINAL); //warn if var is final already
     entry->final = true;
 }
