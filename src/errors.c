@@ -48,7 +48,9 @@ static char* getErrString(Error e) {
         case ERR_MATH_ON_ARRAY:         return "Holly does not currently support math operations on entire arrays";
         case ERR_REF_UNSET:             return "Attempted to reference an unset value!";
         case ERR_UNSET_FINAL:           return "Attempted to declare a 'final' variable without assigning a value!";
+        case ERR_INVALID_VALTYPE:       return "Passed an invalid value type to a function!";
         case ERR_BREAK_NO_LOOP:         return "Encountered a 'break' statement outside of a loop!";
+        case ERR_TOO_MANY_PARAMS:       return "Exceeded the max allowed number of params in a function!";
     }
 }
 

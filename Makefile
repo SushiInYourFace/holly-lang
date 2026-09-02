@@ -15,6 +15,7 @@ endif
 
 SRCS = $(wildcard src/*.c)
 SRCS += $(wildcard src/parsing/*.c)
+SRCS += $(wildcard src/functions/*.c)
 
 $(OUTNAME): $(SRCS)
 	$(CC) $(SRCS) $(CFLAGS) $(LIBS) -o $(OUTNAME)

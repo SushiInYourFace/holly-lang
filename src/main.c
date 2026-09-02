@@ -6,7 +6,8 @@
 #include "logging.h"
 #include "tokens.h"
 #include "utils.h"
-#include "functions.h"
+#include "functions/functions.h"
+#include "functions/builtins.h"
 #include "values.h"
 
 int main(int argc, char** argv) {
@@ -58,6 +59,7 @@ int main(int argc, char** argv) {
     TreeNode *main_tree = parseMain(&list);
     FunctionEntry *fun_hash = NULL;
     parseFunctions(&list, &fun_hash);
+    initBuiltins(&fun_hash);
     freeTokenListItems(&list);
     clock_gettime(CLOCK_MONOTONIC, &done_parsing);
 

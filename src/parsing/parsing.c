@@ -3,7 +3,7 @@
 #include "types.h"
 #include "utils.h"
 #include "errors.h"
-#include "functions.h"
+#include "functions/functions.h"
 #include "values.h"
 
 static const TokenType start_statement_tokens[] =   
@@ -122,6 +122,7 @@ static ParamNames p_getParams(Parser *p) {
     ParamNames ret = params_empty;
     Token *cur;
     while(p_see(p)->type != TK_RPAREN) {
+        if(ret.count >= MAX_FUN_PARAMS) raiseError(ERR_TOO_MANY_PARAMS);
         cur = expectToken(p, TK_VARNAME);
         ret.list[ret.count] = strdup(cur->string);
         ret.count++;
@@ -261,7 +262,7 @@ static TreeNode *makeConditionNode(TreeNode *left, TokenType comparator, TreeNod
 }
 
 //a node that calls a function
-static TreeNode *makeFunCallNode(char *fun_name, ParamValues params) {
+static TreeNode *makeFunCallNode(char *fun_name, ParamValueNodes params) {
     num_nodes++;
     TreeNode *node = malloc(sizeof(TreeNode));
     node->type = NODE_FUN_CALL;
@@ -416,9 +417,10 @@ static TreeNode *parseDisplay(Parser *p) {
 static TreeNode *parseFunCall(Parser *p) {
     Token *fun_name_tk = expectToken(p, TK_FUN_NAME);
     expectToken(p, TK_LPAREN);
-    ParamValues params = {.count = 0, .list = {NULL}};
+    ParamValueNodes params = {.count = 0, .list = {NULL}};
     //get given params
     while(p_see(p)->type != TK_RPAREN) {
+        if(params.count >= MAX_FUN_PARAMS) raiseError(ERR_TOO_MANY_PARAMS);
         params.list[params.count] = parseExpression(p);
         params.count++;
         if(p_see(p)->type == TK_RPAREN) {

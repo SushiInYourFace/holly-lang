@@ -159,7 +159,7 @@ Token nextTokenData(Cursor *cur) {
         case '"':
             //string
             advPastStr(cur);
-            char* str = rangeToString(cur, (Range){start, cur->pos});
+            char* str = rangeToString(cur, (Range){start + 1, cur->pos - 1});
             return (Token){ TK_STRING, .string=str};
         default:
             if(isalpha(c)) { //if the char is a letter, it's the start of a keyword

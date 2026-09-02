@@ -44,6 +44,8 @@ typedef enum {
     ERR_MATH_ON_ARRAY,
     ERR_REF_UNSET,
     ERR_UNSET_FINAL,
+    ERR_INVALID_VALTYPE,
+    ERR_TOO_MANY_PARAMS,
     ERR_OTHER
 } Error;
 

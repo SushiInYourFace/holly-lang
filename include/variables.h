@@ -32,7 +32,11 @@ struct Environment{
     } strings;
 };
 
-typedef struct EnvSketch EnvSketch;
+//return for a var lookup. Gives the var entry itself as well as the environment which owns it
+typedef struct VarLookup {
+    VarEntry *var;
+    Environment *owner;
+}VarLookup;
 
 typedef struct {
     char c;

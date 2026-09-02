@@ -4,9 +4,10 @@
 
 #include "errors.h"
 #include "logging.h"
+#include "parsing/parsing.h"
 #include "types.h"
 #include "values.h"
-#include "functions.h"
+#include "functions/functions.h"
 #include "variables.h"
 
 Value eval(TreeNode *node, Environment *env, FunctionEntry *fun_hash) {
@@ -172,15 +173,26 @@ Value eval(TreeNode *node, Environment *env, FunctionEntry *fun_hash) {
             FunctionEntry *fun = findFunction(node->fun_call.fun_name, fun_hash);
             if(!fun) raiseError(ERR_UNDEF_FUN);
             //check for correct num of params
-            if(fun->params.count != node->fun_call.params.count) {
-                raiseErrorWithCtx(ERR_INVALID_NUM_PARAMS, CTX_2SIZE, fun->params.count, node->fun_call.params.count);
+            if(fun->is_builtin) { //builtins do their own param checking
+                ParamValues vals; //array to store values that will be passed to builtin
+                vals.count = node->fun_call.params.count;
+                for(size_t i = 0; i < vals.count; i++) {
+                    vals.list[i] = eval(node->fun_call.params.list[i], env, fun_hash);
+                }
+                Value ret = dupVal(fun->builtin(vals)); //no current builtins that return malloc'd data, but future guard
+                addValToEnv(env, ret);
+                return ret; //no need to type check here, should be done inside the builtin
+
+            }
+            if(fun->param_names.count != node->fun_call.params.count) {
+                raiseErrorWithCtx(ERR_INVALID_NUM_PARAMS, CTX_2SIZE, fun->param_names.count, node->fun_call.params.count);
             }
             Environment fun_env;
             initEnv(&fun_env, NULL); //funs can't see parent env
-            for(size_t i = 0; i < fun->params.count; i++) { //add params to the fun environment
+            for(size_t i = 0; i < fun->param_names.count; i++) { //add params to the fun environment
                 addVarToHash(
                     &fun_env,  //new param env
-                    fun->params.list[i], //param name from fun dec
+                    fun->param_names.list[i], //param name from fun dec
                     eval(node->fun_call.params.list[i], env, fun_hash), //param value from node
                     false //not final
                 );

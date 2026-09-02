@@ -56,12 +56,18 @@ typedef enum {
 } NodeType;
 
 typedef struct TreeNode TreeNode; //forward dec for recursion
-typedef struct ParamValues ParamValues;
+typedef struct ParamValueNodes ParamValueNodes;
 
-struct ParamValues {
+struct ParamValueNodes {
     TreeNode *list[MAX_FUN_PARAMS];
     size_t count;
 };
+
+//Param value nodes after being parsed
+typedef struct ParamValues {
+    Value list[MAX_FUN_PARAMS];
+    size_t count;
+} ParamValues;
 
 struct TreeNode {
     NodeType type;
@@ -113,7 +119,7 @@ struct TreeNode {
         } while_loop;
         struct {
             char* fun_name;
-            ParamValues params;
+            ParamValueNodes params;
         } fun_call;
         struct {
             TreeNode* val;
@@ -134,11 +140,17 @@ typedef struct {
     size_t count;
 } ParamNames;
 
+typedef Value (*BuiltinFun)(ParamValues);
+
 typedef struct {
     char* fun_name;
+    bool is_builtin; //if the function is a builtin, it needs to be evaluated differently
     ValueType return_type;
-    TreeNode *fun_block;
-    ParamNames params;
+    union{
+        TreeNode *fun_block;
+        BuiltinFun builtin;
+    };
+    ParamNames param_names;
     UT_hash_handle hh;
 } FunctionEntry;
 

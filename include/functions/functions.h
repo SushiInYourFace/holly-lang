@@ -3,6 +3,8 @@
 #include "parsing/parsing.h"
 #include "types.h"
 
+extern const ParamNames EMPTY_PARAMS;
+
 //functions
 
 //get a function return type by parsing name
