@@ -114,6 +114,7 @@ static char* getWarnString(Warning w) {
         case WARN_SAW_INVALID_VAL:      return "Saw an invalid value in a non-critical context";
         case WARN_CAST_VAR_TYPE:        return "Casting the type of a var";
         case WARN_MAX_LOOP_ITERS:       return "Broke out of a loop early, is there an infinite loop?";
+        case WARN_NEG_NUM_LOOP:         return "Passed a negative number to a loop";
     }
 }
 

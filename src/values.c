@@ -45,6 +45,13 @@ void freeValue(Value in) {
     }
 }
 
+//change any integers to doubles
+Value tryCastValue(Value in, ValueType type) {
+    if(type != VAL_DOUBLE) return in; //only doubles can be cast to
+    if(in.type != VAL_INT) return in; //only ints can be cast from
+    return (Value) {.type = VAL_DOUBLE, .val_float = in.val_int};
+}
+
 Value dupVal(Value in) {
     Value ret = in;
     if(in.type == VAL_STRING) {

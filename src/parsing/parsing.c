@@ -8,7 +8,7 @@
 
 static const TokenType start_statement_tokens[] =   
 {TK_DONE,TK_SEMICOLON,TK_INTEGER,TK_ASSIGN,TK_FINAL,TK_FINALIZE,TK_DOUBLE,TK_VARNAME,TK_DISPLAY, 
-TK_IF,TK_FUN_NAME,TK_RETURN, TK_WHILE, TK_BREAK};
+TK_IF,TK_FUN_NAME,TK_RETURN, TK_WHILE, TK_BREAK, TK_LOOP};
 static const TokenType var_declare_tokens[] =        {TK_ASSIGN, TK_FINAL};
 static const TokenType var_reassign_tokens[] =      {TK_EQ, TK_PLUS_INPLACE, 
                                                     TK_MINUS_INPLACE, TK_MULT_INPLACE, TK_DIV_INPLACE};
@@ -37,6 +37,7 @@ static uint32_t num_nodes = 0;
 static TreeNode *parseBlock(Parser *p, BlockType b_type);
 static TreeNode *parseConditional(Parser *p);
 static TreeNode *parseWhileLoop(Parser *p);
+static TreeNode *parseNumLoop(Parser *p);
 static TreeNode *parseFunCall(Parser *p);
 
 //returns whether a token is in a given list
@@ -248,6 +249,15 @@ static TreeNode *makeWhileLoopNode(TreeNode *condition, TreeNode *body) {
     node->while_loop.condition = condition;
     node->while_loop.body = body;
     return  node;
+}
+
+static TreeNode *makeNumLoopNode(TreeNode *num, TreeNode *body) {
+    num_nodes++;
+    TreeNode *node = malloc(sizeof(TreeNode));
+    node->type = NODE_NUM_LOOP;
+    node->num_loop.number = num;
+    node->num_loop.body = body;
+    return node;
 }
 
 //a comparison or expression that evaluates to either true or false
@@ -476,6 +486,8 @@ static TreeNode *parseStatement(Parser *p) {
         ret = parseReturn(p);
     } else if (tok == TK_WHILE) {
         ret = parseWhileLoop(p);
+    } else if (tok == TK_LOOP) {
+        ret = parseNumLoop(p);
     } else if (tok == TK_BREAK) {
         ret = parseBreak(p);
     } else if (tok == TK_SEMICOLON) {
@@ -528,6 +540,14 @@ static TreeNode *parseWhileLoop(Parser *p) {
     return makeWhileLoopNode(condition, body);
 }
 
+static TreeNode *parseNumLoop(Parser *p) {
+    expectToken(p, TK_LOOP);
+    TreeNode *num_loops = parseExpression(p); 
+    expectToken(p, TK_COLON);
+    TreeNode *body = parseBlock(p, BLOCK_LOOP);
+    return makeNumLoopNode(num_loops, body);
+}
+
 
 
 //parse a full block of tokens
@@ -542,6 +562,7 @@ static TreeNode *parseBlock(Parser *p, BlockType b_type) {
         case BLOCK_MAIN:            done_tk = TK_DONE;      break;
         case BLOCK_FUNCTION:        done_tk = TK_ENDFUN;    break;
         case BLOCK_WHILE:           done_tk = TK_ENDWHILE;  break;
+        case BLOCK_LOOP:            done_tk = TK_ENDLOOP;   break;
     }
     while(true) {
        if(p_see(p)->type == done_tk) break; //go until we get a done token
@@ -654,6 +675,10 @@ void freeNode(TreeNode *node) {
         case NODE_WHILE_LOOP:
             freeNode(node->while_loop.condition);
             freeNode(node->while_loop.body);
+            break;
+        case NODE_NUM_LOOP:
+            freeNode(node->num_loop.number);
+            freeNode(node->num_loop.body);
             break;
         case NODE_FUN_CALL:
             free(node->fun_call.fun_name); //name of called function

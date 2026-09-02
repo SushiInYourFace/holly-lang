@@ -55,7 +55,8 @@ typedef enum {
     WARN_CHANGING_VAR_TYPES,
     WARN_CAST_VAR_TYPE,
     WARN_SAW_INVALID_VAL,
-    WARN_MAX_LOOP_ITERS
+    WARN_MAX_LOOP_ITERS,
+    WARN_NEG_NUM_LOOP
 } Warning;
 
 typedef enum {

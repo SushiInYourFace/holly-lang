@@ -158,6 +158,27 @@ Value eval(TreeNode *node, Environment *env, FunctionEntry *fun_hash) {
             logDebug("Iterated a while loop %d times", num_iters);
             if(num_iters >= MAX_LOOP_ITERS) sendWarning(WARN_MAX_LOOP_ITERS);
             return VALUE_EMPTY;
+        case(NODE_NUM_LOOP):
+            logNode("Encountered num loop!");
+            Value iter_value = eval(node->num_loop.number, env, fun_hash);
+            if(iter_value.type != VAL_INT) raiseError(ERR_EXP_INT);
+            if(iter_value.val_int < 0) {
+                sendWarning(WARN_NEG_NUM_LOOP);
+                return VALUE_VOID;
+            }
+            for(int i = 0; i < iter_value.val_int; i++) {
+                eval(node->num_loop.body, env, fun_hash);
+                if(env->should_break) {
+                    env->should_break = false;
+                    return VALUE_VOID;
+                }
+                if(env->should_return) {
+                    env->parent->should_return = true;
+                    env->parent->return_val = env->return_val;
+                    return VALUE_VOID;
+                }
+            }
+            return VALUE_VOID;
         case(NODE_CONDITION):
             Value left_res = eval(node->condition.left, env, fun_hash);
             if(node->condition.comparator == TK_EMPTY) {                 //no comparison
@@ -179,7 +200,7 @@ Value eval(TreeNode *node, Environment *env, FunctionEntry *fun_hash) {
                 for(size_t i = 0; i < vals.count; i++) {
                     vals.list[i] = eval(node->fun_call.params.list[i], env, fun_hash);
                 }
-                Value ret = dupVal(fun->builtin(vals)); //no current builtins that return malloc'd data, but future guard
+                Value ret = fun->builtin(vals); //some builtins malloc data
                 addValToEnv(env, ret);
                 return ret; //no need to type check here, should be done inside the builtin
 

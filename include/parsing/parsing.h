@@ -33,7 +33,8 @@ typedef enum {
     BLOCK_COND_NOT_LAST,
     BLOCK_COND_LAST,
     BLOCK_FUNCTION,
-    BLOCK_WHILE
+    BLOCK_WHILE,
+    BLOCK_LOOP
 }BlockType;
 
 //tree stuff
@@ -52,6 +53,7 @@ typedef enum {
     NODE_FUN_CALL,
     NODE_RETURN,
     NODE_WHILE_LOOP,
+    NODE_NUM_LOOP,
     NODE_BREAK
 } NodeType;
 
@@ -124,6 +126,10 @@ struct TreeNode {
         struct {
             TreeNode* val;
         } node_return;
+        struct {
+            TreeNode* number;
+            TreeNode* body;
+        } num_loop;
     };
 };
 

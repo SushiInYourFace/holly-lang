@@ -62,6 +62,8 @@ const char* getTokenString(TokenType t) {
         case TK_COMMA:          return "TK_COMMA";
         case TK_MODULO:         return "TK_MODULO";
         case TK_BREAK:          return "TK_BREAK";
+        case TK_LOOP:           return "TK_LOOP";
+        case TK_ENDLOOP:        return "TK_ENDLOOP";
     }
 }
 

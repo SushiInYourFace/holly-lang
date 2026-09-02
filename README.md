@@ -15,7 +15,7 @@ Holly requires every variable to begin with a prefix indicating type. Current pr
 - <u>Booleans</u>: prefixed with `b_`, stored internally as `bool`
     - Unlike in C, booleans cannot be used in math operations, and do not evaluate to 1 or 0. 
 - <u>Strings</u>: Prefixed with `s_`, stored internally as `char*`.
-    - There is currently no method to modify, index, or manipulate strings. 
+    - Strings can be concatenated with the `+` operator 
 - <u>Void</u>: Used for functions with no return, prefixed with `v:`. It is not possible to assign variables with type `void`.
 
 
@@ -66,6 +66,15 @@ while(i_count <= 10):
 endwhile;
 ```
 
+#### Loop Statements
+Loop statements are intended for loops that should run x number of times. They function similar to `while` loops, except taking an `int` number of times to run the loop for instead of a condition to evaluate
+```
+final i_num_iters 200;
+loop i_num_iters:
+    display "apples";
+endloop;
+```
+
 #### Functions
 Holly requires functions to be prefixed in the same way as variables, however with a `:` following the prefix rather than a `_`.
 ```
@@ -81,6 +90,14 @@ start;
 display b:is_odd(3); ~displays 'true'
 done;
 ```
+#### Builtins
+Holly supports the following builtins:
+- `i:max(int, int)`
+- `i:min(int, int)`
+- `f:max(float, float)`
+- `f:min(float, float)`
+- `i:stringlen(string)`
+- `f:itod(int)`
 
 ## Attributions
 

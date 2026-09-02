@@ -51,6 +51,8 @@ typedef enum {
     TK_ENDIF,
     TK_WHILE,
     TK_ENDWHILE,
+    TK_LOOP,
+    TK_ENDLOOP,
     TK_FINALIZE,
     TK_DISPLAY,
     TK_RETURN,

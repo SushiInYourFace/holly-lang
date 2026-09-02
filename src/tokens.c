@@ -29,7 +29,9 @@ static const KeywordEntry keywords[] = {
     {"else",         TK_ELSE},
     {"endif",      TK_ENDIF},
     {"return",      TK_RETURN},
-    {"break",       TK_BREAK}
+    {"break",       TK_BREAK},
+    {"loop",        TK_LOOP},
+    {"endloop",         TK_ENDLOOP}
 };
 
 //any token that stores a number rather than a pointer to a string
