@@ -19,13 +19,18 @@ void valueToString(Value val, char* buf, size_t size) {
         case(VAL_STRING):
             snprintf(buf, size, "%s", val.val_str);
             break;
+        case(VAL_CHAR):
+            snprintf(buf,size,"%c", val.val_char);
+            break;
         case(VAL_INVALID):
             snprintf(buf, size, "VAL_INVALID");
             break;
         case(VAL_VOID):
             snprintf(buf, size, "void");
+            break;
         case(VAL_UNSET):
             snprintf(buf, size, "unset");
+            break;
     }
 }
 

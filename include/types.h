@@ -22,6 +22,7 @@ typedef enum {
     VAL_INT,
     VAL_BOOL,
     VAL_STRING,
+    VAL_CHAR,
     VAL_INVALID,
     VAL_VOID,
     VAL_UNSET
@@ -34,6 +35,7 @@ typedef struct {
         double val_float;
         bool val_bool;
         char* val_str;
+        char val_char;
     };
 } Value;
 
@@ -88,6 +90,7 @@ typedef enum {
     TK_VARNAME, //distinct! It's an ident that follows the varname pattern of x_foo
     TK_FUN_NAME, 
     TK_STRING,
+    TK_CHAR,
     //unknown
     TK_EMPTY,
     TK_UNKNOWN,
@@ -105,6 +108,7 @@ typedef struct {
         double decimal;
         bool boolean;
         char* string;
+        char _char;
     };
 } Token;
 

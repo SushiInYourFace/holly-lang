@@ -13,4 +13,4 @@ CLOC_OUT=$(cloc --exclude-dir=$EXCLUDE_DIRS --quiet --exclude-lang=$EXCLUDE_LANG
 echo "$CLOC_OUT"
 CLOC_SUM=$(echo "$CLOC_OUT" | grep "SUM")
 
-echo "${TIMESTAMP}: $CLOC_SUM" >> $HIST_FILE
+echo "${TIMESTAMP}: $CLOC_SUM" >> $HIST_FILE 

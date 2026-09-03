@@ -15,6 +15,7 @@ const TypePrefix type_prefixes[] = {
     {'f',   VAL_DOUBLE}, //Holly floats are handled as doubles internally
     {'b',   VAL_BOOL},
     {'s', VAL_STRING},
+    {'c', VAL_CHAR},
     {'v',   VAL_VOID}
 };
 

@@ -63,6 +63,12 @@ void advPastStr(Cursor *cur) {
     }
 }
 
+char advPastCharDec(Cursor *cur) {
+    char ret = advance(cur);
+    if(advance(cur) != '\'') raiseError(ERR_INVALID_CHAR);
+    return ret;
+}
+
 void advPastAlpha(Cursor *cur) {
     while(isalpha(see(cur))) {
         advance(cur); //advance until we are no longer over a letter

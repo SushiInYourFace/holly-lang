@@ -26,6 +26,7 @@ const char* getValueTypeString(ValueType v) {
         case VAL_INT:       return "VAL_INT";
         case VAL_BOOL:      return "VAL_BOOL";
         case VAL_STRING:    return "VAL_STRING";
+        case VAL_CHAR:      return "VAL_CHAR";
         case VAL_VOID:      return "VAL_VOID";
         case VAL_INVALID:   return "VAL_INVALID";
         case VAL_UNSET:     return "VAL_UNSET";
@@ -36,6 +37,7 @@ static void catchInvalidMath(ValueType left, ValueType right) {
     if(left == VAL_BOOL || right == VAL_BOOL) raiseError(ERR_MATH_ON_BOOL);
     if(left == VAL_STRING || right == VAL_STRING) raiseError(ERR_MATH_ON_STR);
     if(left == VAL_VOID || right == VAL_VOID) raiseError(ERR_OP_ON_VOID);
+    if(left == VAL_CHAR || right == VAL_CHAR) raiseError(ERR_MATH_ON_CHAR);
     if(left == VAL_UNSET || right == VAL_UNSET) raiseError(ERR_REF_UNSET);
 }
 
@@ -135,6 +137,8 @@ bool isTruthy(Value val) {
             return (val.val_int); //if it's truthy in C, it's truthy in Holly
         case(VAL_DOUBLE):
             return (val.val_float);
+        case(VAL_CHAR):
+            return (val.val_char);
         case(VAL_STRING):
             return (val.val_str); //if a pointer has been set, it is truthy
         case(VAL_VOID):
@@ -155,6 +159,8 @@ bool isTruthy(Value val) {
             break;                                                                  \
         case(VAL_DOUBLE): (result_dest) = ((left).val_float op (right).val_float);  \
             break;                                                                  \
+        case(VAL_CHAR): (result_dest) = ((left).val_char op (right).val_char);      \
+        break;                                                                      \
         case(VAL_STRING): raiseError(ERR_MATH_ON_STR);                              \
         case(VAL_UNSET):   raiseError(ERR_REF_UNSET);                               \
         case(VAL_VOID):     raiseError(ERR_OP_ON_VOID);                             \

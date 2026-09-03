@@ -29,6 +29,9 @@ char lookahead(Cursor *cur);
 //advances the cursor to the next non-space item
 void advPastWhitespace(Cursor *cur);
 
+//advance past a user declared char
+char advPastCharDec(Cursor *cur);
+
 //advances past the next double quote, returning the pos of the start and end of the quote
 void advPastStr(Cursor *cur);
 

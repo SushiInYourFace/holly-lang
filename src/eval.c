@@ -75,7 +75,7 @@ Value eval(TreeNode *node, Environment *env, FunctionEntry *fun_hash) {
                 //pass a return down the line
                 env->should_return = block_env.should_return;
                 env->return_val = ret; //pass return down the chain
-                return VALUE_EMPTY;
+                return VALUE_VOID;
             }
             //get return val from the block if it was the top level
             Value ret = dupVal(block_env.return_val);
@@ -134,7 +134,7 @@ Value eval(TreeNode *node, Environment *env, FunctionEntry *fun_hash) {
                     logNode("Conditional node being evaluated has no else block");
                 }
             }
-            return VALUE_EMPTY;
+            return VALUE_VOID;
         case(NODE_WHILE_LOOP):
             logNode("Encountered while loop");
             Value w_should_run = eval(node->while_loop.condition, env, fun_hash); //initial condition
@@ -148,11 +148,11 @@ Value eval(TreeNode *node, Environment *env, FunctionEntry *fun_hash) {
                 if(env->should_return) {
                     env->parent->should_return = true;
                     env->parent->return_val = env->return_val;
-                    return VALUE_EMPTY;
+                    return VALUE_VOID;
                 }
                 if(env->should_break) {
                     env->should_break = false; //prevent it from leaking higher
-                    return VALUE_EMPTY;
+                    return VALUE_VOID;
                 }
             }
             logDebug("Iterated a while loop %d times", num_iters);
@@ -238,11 +238,11 @@ Value eval(TreeNode *node, Environment *env, FunctionEntry *fun_hash) {
         case(NODE_BREAK):
             logNode("Encountered a break node");
             env->should_break = true;
-            return VALUE_EMPTY;
+            return VALUE_VOID;
 
         
         default:
             raiseError(ERR_UNKNOWN_NODE_TYPE);
     }
-    return VALUE_EMPTY;
+    return VALUE_VOID;
 }

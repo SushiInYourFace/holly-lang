@@ -36,7 +36,7 @@ static const KeywordEntry keywords[] = {
 
 //any token that stores a number rather than a pointer to a string
 static const TokenType non_string_tokens[] = {
-    TK_INTEGER, TK_DOUBLE, TK_BOOL
+    TK_INTEGER, TK_DOUBLE, TK_BOOL, TK_CHAR
 };
 #define NUM_NONSTRING_TOKENS (sizeof(non_string_tokens) /sizeof(non_string_tokens[0]))
 
@@ -138,7 +138,7 @@ Token nextTokenData(Cursor *cur) {
         case '-': 
             if(see(cur) == '=') { //-=
                 advance(cur);
-                return (Token){ TK_MINUS_INPLACE, .string=NULL};
+                return NULL_STRING_TK(TK_MINUS_INPLACE);
             } else if (isnumber(see(cur))) { //handle a negative number
                 //TODO: maybe stick this in a static function?
                 bool is_float = advPastNum(cur);
@@ -154,10 +154,14 @@ Token nextTokenData(Cursor *cur) {
             case '=':
             if(see(cur) == '=') {
                 advance(cur);
-                return (Token){TK_IS_EQ, .string=NULL};
+                return NULL_STRING_TK(TK_IS_EQ);
             }
-            return (Token){ TK_EQ, .string=NULL};
+            return NULL_STRING_TK(TK_EQ);
         //longer token types
+        case '\'':
+            //char
+            char ret = advPastCharDec(cur);
+            return (Token) {TK_CHAR, ._char = ret};
         case '"':
             //string
             advPastStr(cur);
@@ -177,7 +181,7 @@ Token nextTokenData(Cursor *cur) {
                     return (Token){TK_INTEGER, .integer=num};
                 }
             }
-            return (Token){ TK_UNKNOWN, .string=NULL};
+            return NULL_STRING_TK(TK_UNKNOWN);
     }
 }
 

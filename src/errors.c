@@ -51,6 +51,9 @@ static char* getErrString(Error e) {
         case ERR_INVALID_VALTYPE:       return "Passed an invalid value type to a function!";
         case ERR_BREAK_NO_LOOP:         return "Encountered a 'break' statement outside of a loop!";
         case ERR_TOO_MANY_PARAMS:       return "Exceeded the max allowed number of params in a function!";
+        case ERR_INVALID_CHAR:          return "Invalid char declaration!";
+        case ERR_MATH_ON_CHAR:          return "Math on char values is currently unsupported";
+        case ERR_USER_RAISED:           return "User raised an error!";
     }
 }
 

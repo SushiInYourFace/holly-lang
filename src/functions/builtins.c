@@ -112,6 +112,36 @@ static Value builtin_to_upper(ParamValues vals) {
     return (Value) {.type = VAL_STRING, .val_str = strToCase(vals.list[0].val_str, true)};
 }
 
+static Value builtin_char_in_str(ParamValues vals) {
+    vals = checkValues(vals, 2, VAL_STRING, VAL_CHAR);
+    char* string = vals.list[0].val_str;
+    char test = vals.list[1].val_char;
+    for(size_t i = 0; i < strlen(string); i++) {
+        if(string[i] == test) return VALUE_TRUE;
+    }
+    return VALUE_FALSE;
+}
+
+static Value builtin_replace_char(ParamValues vals) {
+    vals = checkValues(vals, 3, VAL_STRING, VAL_CHAR, VAL_CHAR);
+    char* string = vals.list[0].val_str;
+    size_t string_len = strlen(string);
+    char old = vals.list[1].val_char;
+    char new = vals.list[2].val_char;
+    char* out = malloc(string_len + 1);
+    for(size_t i = 0; i < strlen(string); i++) {
+        if(string[i] == old)    out[i] = new;
+        else                    out[i] = string[i];
+    }
+    out[string_len] = '\0';
+    return (Value) {.type = VAL_STRING, .val_str = out};
+}
+
+static Value builtin_error() {
+    raiseError(ERR_USER_RAISED);
+    return VALUE_VOID;
+}
+
 void initBuiltins(FunctionEntry **hash) {
     addBuiltinToHash("i:stringlen", hash, VAL_INT, builtin_stringlen);
     addBuiltinToHash("i:min", hash, VAL_INT, builtin_min_int);
@@ -124,4 +154,7 @@ void initBuiltins(FunctionEntry **hash) {
     addBuiltinToHash("i:ceil", hash, VAL_INT, builtin_ceil_int);
     addBuiltinToHash("s:tolower", hash, VAL_STRING, builtin_to_lower);
     addBuiltinToHash("s:toupper", hash, VAL_STRING, builtin_to_upper);
+    addBuiltinToHash("v:error", hash, VAL_VOID, builtin_error);
+    addBuiltinToHash("b:char_in_str", hash, VAL_BOOL, builtin_char_in_str);
+    addBuiltinToHash("s:replace_char", hash, VAL_STRING, builtin_replace_char);
 }

@@ -35,6 +35,7 @@ const char* getTokenString(TokenType t) {
         case TK_IDENT:          return "TK_IDENT";
         case TK_DOUBLE:         return "TK_DOUBLE";
         case TK_STRING:         return "TK_STRING";
+        case TK_CHAR:           return "TK_CHAR";
         case TK_EOF:            return "TK_EOF";
         case TK_UNKNOWN:        return "TK_UNKNOWN";
         case NUM_TOKENS:        return "NUM_TOKENS";

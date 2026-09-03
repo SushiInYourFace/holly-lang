@@ -8,12 +8,12 @@
 
 static const TokenType start_statement_tokens[] =   
 {TK_DONE,TK_SEMICOLON,TK_INTEGER,TK_ASSIGN,TK_FINAL,TK_FINALIZE,TK_DOUBLE,TK_VARNAME,TK_DISPLAY, 
-TK_IF,TK_FUN_NAME,TK_RETURN, TK_WHILE, TK_BREAK, TK_LOOP};
+TK_IF,TK_FUN_NAME,TK_RETURN, TK_WHILE, TK_BREAK, TK_LOOP, TK_CHAR};
 static const TokenType var_declare_tokens[] =        {TK_ASSIGN, TK_FINAL};
 static const TokenType var_reassign_tokens[] =      {TK_EQ, TK_PLUS_INPLACE, 
                                                     TK_MINUS_INPLACE, TK_MULT_INPLACE, TK_DIV_INPLACE};
 static const TokenType primary_tokens[] =           {TK_INTEGER, TK_VARNAME, TK_DOUBLE, TK_BOOL,
-                                                    TK_FUN_NAME, TK_STRING};
+                                                    TK_FUN_NAME, TK_STRING, TK_CHAR};
 static const TokenType add_sub_tokens[] =           {TK_PLUS,TK_MINUS};
 static const TokenType mult_div_tokens[] =          {TK_MULT, TK_DIV, TK_MODULO};
 static const TokenType comparator_tokens[] =         {TK_IS_EQ, TK_NOT_EQ, TK_GT, TK_GT_EQ, 
@@ -324,6 +324,9 @@ static TreeNode *parsePrimary(Parser *p) {
         case TK_BOOL:
             Value b_val = {.type=VAL_BOOL, .val_bool = t->boolean};
             return makeValueNode(b_val);
+        case TK_CHAR:
+            Value c_val = {.type = VAL_CHAR, .val_char = t->_char};
+            return makeValueNode(c_val);
         case TK_FUN_NAME:
             //if it's a function, expect the ()
             p_rewind(p);
