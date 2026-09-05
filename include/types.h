@@ -8,6 +8,9 @@
 #define NS_TO_US 1000.0
 
 
+//forward declares
+typedef struct Value Value;
+
 
 //basic helper types
 //the start and end range of a given run
@@ -23,12 +26,19 @@ typedef enum {
     VAL_BOOL,
     VAL_STRING,
     VAL_CHAR,
+    VAL_ARRAY,
     VAL_INVALID,
     VAL_VOID,
     VAL_UNSET
 } ValueType;
 
 typedef struct {
+    size_t len;
+    ValueType member_type;
+    Value* arr;
+} ValueArray;
+
+struct Value{
     ValueType type;
     union {
         int64_t val_int;
@@ -36,8 +46,9 @@ typedef struct {
         bool val_bool;
         char* val_str;
         char val_char;
+        ValueArray val_arr;
     };
-} Value;
+};
 
 //tokens
 typedef enum {
@@ -79,6 +90,7 @@ typedef enum {
     TK_LT_EQ,
     TK_LPAREN,
     TK_RPAREN,
+    TK_ARRAY_INDEX,
     TK_COLON,
     TK_COMMA,
     TK_EOF,

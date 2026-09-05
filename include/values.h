@@ -11,6 +11,8 @@ extern const Value VALUE_UNSET;
 
 //frees any pointer that may be held in a value object
 void freeValue(Value in);
+//frees pointers held in a value object, keeping strings that might be stored elsewhere
+void freeValueKeepStrings(Value in);
 //change any integers to doubles
 Value tryCastValue(Value in, ValueType type);
 //duplicate a value, duplicating malloc()ed data. It is caller's responsibility to free the new pointer

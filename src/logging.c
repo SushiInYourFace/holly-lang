@@ -3,6 +3,7 @@
 
 #include "logging.h"
 #include "types.h"
+#include "values.h"
 
 void valueToString(Value val, char* buf, size_t size) {
     switch(val.type) {
@@ -28,6 +29,9 @@ void valueToString(Value val, char* buf, size_t size) {
         case(VAL_VOID):
             snprintf(buf, size, "void");
             break;
+        case(VAL_ARRAY):
+            snprintf(buf, size, "Array[%s]", getValueTypeString(val.val_arr.member_type));
+            break;
         case(VAL_UNSET):
             snprintf(buf, size, "unset");
             break;
@@ -50,6 +54,7 @@ static void logMessage(LogLevel level, const char *format, va_list args) {
         case LOG_TOKEN:     level_string = "token";     break;
         case LOG_NODE:      level_string = "node";      break;
         case LOG_DATA:      level_string = "data";      break;
+        case LOG_EVAL:      level_string = "eval";      break;
         default:            level_string = "???";       break;
     }
 
@@ -105,6 +110,13 @@ void logData(const char* format, ...) {
     va_list args;
     va_start(args, format);
     logMessage(LOG_DATA, format, args);
+    va_end(args);
+}
+
+void logEval(const char* format, ...) {
+    va_list args;
+    va_start(args, format);
+    logMessage(LOG_EVAL, format, args);
     va_end(args);
 }
 

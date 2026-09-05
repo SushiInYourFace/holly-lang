@@ -5,6 +5,8 @@
 #include "errors.h"
 #include "functions/functions.h"
 #include "values.h"
+#include <stddef.h>
+#include <stdlib.h>
 
 static const TokenType start_statement_tokens[] =   
 {TK_DONE,TK_SEMICOLON,TK_INTEGER,TK_ASSIGN,TK_FINAL,TK_FINALIZE,TK_DOUBLE,TK_VARNAME,TK_DISPLAY, 
@@ -88,6 +90,11 @@ static Token *p_advance(Parser *p) {
 static Token *p_lookahead(Parser *p) {
     Token *ret = &p->list->items[p->pos + 1];
     return ret;
+}
+
+static Token *p_lookahead_indexed(Parser *p, size_t off) {
+    if(p->pos + off >= p->list->count) return NULL;
+    return &p->list->items[p->pos + off];
 }
 
 static void p_rewind(Parser *p) {
@@ -190,7 +197,23 @@ static TreeNode *makeVarAssignNode(char* var_name, TreeNode *value_exp, bool is_
     node->var_assign.val = value_exp;
     node->var_assign.final = is_final;
     node->var_assign.set = is_set;
+    node->var_assign.array = false;
+    node->var_assign.array_size = -1;
     logNode("New var assign node");
+    return node;
+}
+
+static TreeNode *makeVarAssignNodeArr(char* var_name, size_t arr_len) {
+    num_nodes++;
+    TreeNode *node = malloc(sizeof(TreeNode));
+    node->type = NODE_VAR_ASSIGN;
+    node->var_assign.name = var_name;
+    node->var_assign.val = NULL;
+    node->var_assign.final = false;
+    node->var_assign.array = true;
+    node->var_assign.array_size = arr_len;
+    node->var_assign.set = false;
+    logNode("New array var assign node!");
     return node;
 }
 
@@ -199,7 +222,20 @@ static TreeNode *makeVarReferenceNode(char* var_name) {
     TreeNode *node = malloc(sizeof(TreeNode));
     node->type = NODE_VAR_REFERENCE;
     node->var_reference.name = var_name;
+    node->var_reference.has_index = false;
+    node->var_reference.index = -1;
     logNode("New var reference node");
+    return node;
+}
+
+static TreeNode *makeArrayReferenceNode(char* var_name, size_t index) {
+    num_nodes++;
+    TreeNode *node = malloc(sizeof(TreeNode));
+    node->type = NODE_VAR_REFERENCE;
+    node->var_reference.name = var_name;
+    node->var_reference.has_index = true;
+    node->var_reference.index = index;
+    logNode("New indexed var reference node");
     return node;
 }
 
@@ -210,6 +246,17 @@ static TreeNode *makeVarReassignNode(char* var_name, TreeNode *value_exp) {
     node->var_reassign.name = var_name;
     node->var_reassign.val = value_exp;
     logNode("New var reassign node");
+    return node;
+}
+
+static TreeNode *makeArrayReassignNode(char* var_name, TreeNode *value_exp, size_t index) {
+    num_nodes++;
+    TreeNode *node = malloc(sizeof(TreeNode));
+    node->type = NODE_VAR_REASSIGN;
+    node->var_reassign.name = var_name;
+    node->var_reassign.val = value_exp;
+    node->var_reassign.has_index = true;
+    node->var_reassign.index = index;
     return node;
 }
 
@@ -320,6 +367,10 @@ static TreeNode *parsePrimary(Parser *p) {
             return makeValueNode(s_val);
         case TK_VARNAME:
             char* var_name = strdup(t->string); //detach string from token list
+            if(p_see(p)->type == TK_ARRAY_INDEX) { //handle indexed 
+                size_t index_num = p_advance(p)->integer;
+                return makeArrayReferenceNode(var_name, index_num);
+            }
             return makeVarReferenceNode(var_name);
         case TK_BOOL:
             Value b_val = {.type=VAL_BOOL, .val_bool = t->boolean};
@@ -371,6 +422,11 @@ static TreeNode *parseVarAssign(Parser *p) {
     Token *name_tk = p_advance(p);
     if(name_tk->type != TK_VARNAME) raiseError(ERR_EXP_VARNAME); 
     char *varname = strdup(name_tk->string); //detatch from the token list
+    if(p_see(p)->type == TK_ARRAY_INDEX) { //if declaring an array
+        size_t arr_len = p_advance(p)->integer;
+        if(p_see(p)->type != TK_SEMICOLON) raiseError(ERR_SET_ARRAY_FULL);
+        return makeVarAssignNodeArr(varname, arr_len);
+    }
     TreeNode *expression;
     bool is_set = true; //whether the variable is being set
     if(p_see(p)->type == TK_SEMICOLON) { //declare without setting
@@ -387,8 +443,15 @@ static TreeNode *parseVarAssign(Parser *p) {
 //TODO: slim down
 static TreeNode *parseVarReassign(Parser *p) {
     //get var we are reassigning
+    logDebug("Hello");
     Token *name_tk = p_advance(p);
     char *var_name = strdup(name_tk->string); //detach name from token list
+    if(p_see(p)->type == TK_ARRAY_INDEX) {//reassigning value at index
+        size_t index = p_advance(p)->integer;
+        expectToken(p, TK_EQ); //no inplace ops yet
+        TreeNode *exp = parseExpression(p);
+        return makeArrayReassignNode(var_name, exp, index);
+    }
     Token *op_tk = p_advance(p); //either a straight =, or an inplace op
     TreeNode *expression = parseExpression(p); //right side of the statement, new value for var
     TreeNode *var_reference, *bin_node = NULL;
@@ -471,7 +534,12 @@ static TreeNode *parseStatement(Parser *p) {
     TreeNode *ret = NULL;
 
     if(tokenInCategory(tok, CAT_PRIMARY)) { //a statement that starts with a primary
-        if(tok == TK_VARNAME && tokenInCategory(p_lookahead(p)->type, CAT_VAR_REASSIGN)) {
+        if(
+            tok == TK_VARNAME && 
+            (tokenInCategory(p_lookahead(p)->type, CAT_VAR_REASSIGN) || 
+            tokenInCategory(p_lookahead_indexed(p, 2)->type, CAT_VAR_REASSIGN))
+        ) 
+        {
             // check for reassigns
             ret = parseVarReassign(p);
         } else ret = parseExpression(p); //if it's not a reassign, it's a normal expression

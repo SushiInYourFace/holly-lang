@@ -41,6 +41,7 @@ typedef enum {
     ERR_NO_IN_FILE,
     ERR_MATH_ON_STR,
     ERR_MATH_ON_CHAR,
+    ERR_MATH_ON_ARR,
     ERR_BREAK_NO_LOOP,
     ERR_OP_ON_VOID,
     ERR_MATH_ON_ARRAY,
@@ -48,6 +49,13 @@ typedef enum {
     ERR_UNSET_FINAL,
     ERR_INVALID_VALTYPE,
     ERR_TOO_MANY_PARAMS,
+    ERR_IMPROPER_ARR_INDEX,
+    ERR_SET_ARRAY_FULL,
+    ERR_INDEX_OUT_OF_RANGE,
+    ERR_NOT_ARRAY,
+    ERR_IS_ARRAY,
+    ERR_ARRAY_OF_STRINGS,
+    ERR_INPLACE_ON_ARRAY,
     ERR_USER_RAISED,
     ERR_OTHER
 } Error;
@@ -67,7 +75,8 @@ typedef enum {
     CTX_2TKTYPE,
     CTX_1TKCAT_1TKTYPE,
     CTX_2SIZE,
-    CTX_2VAL
+    CTX_2VAL,
+    CTX_1VALTYPE
 } ErrCtx;
 
 //raise an error with the given code

@@ -1,5 +1,6 @@
 #include "errors.h"
 #include "logging.h"
+#include "types.h"
 #include "utils.h"
 #include "values.h"
 #include <stdio.h>
@@ -53,6 +54,14 @@ static char* getErrString(Error e) {
         case ERR_TOO_MANY_PARAMS:       return "Exceeded the max allowed number of params in a function!";
         case ERR_INVALID_CHAR:          return "Invalid char declaration!";
         case ERR_MATH_ON_CHAR:          return "Math on char values is currently unsupported";
+        case ERR_MATH_ON_ARR:           return "Math on arrays is currently unsupported";
+        case ERR_IMPROPER_ARR_INDEX:    return "Improperly indexed an array!";
+        case ERR_SET_ARRAY_FULL:        return "Setting an array at declaration time is currently unsupported";
+        case ERR_INDEX_OUT_OF_RANGE:    return "Tried to access an out-of-bounds array element!";
+        case ERR_NOT_ARRAY:             return "Tried to index a non-array value!";
+        case ERR_IS_ARRAY:              return "Tried to improperly access an array!";
+        case ERR_ARRAY_OF_STRINGS:      return "Arrays of strings are not currently supported";
+        case ERR_INPLACE_ON_ARRAY:      return "In-place operations on arrays are not currently supported";
         case ERR_USER_RAISED:           return "User raised an error!";
     }
 }
@@ -71,7 +80,7 @@ void raiseError(Error e) {
 void raiseErrorWithCtx(Error e, ErrCtx p, ...) {
     //display error message
     displayErrorMessage(e);
-    fprintf(stderr, ": "); //formatting
+    fprintf(stderr, "\nCONTEXT: "); //formatting
     va_list args;
     va_start(args, p); //init variadic params
     switch(p) {
@@ -103,7 +112,13 @@ void raiseErrorWithCtx(Error e, ErrCtx p, ...) {
                 "Expected %zu items, got %zu\n",
                 va_arg(args, size_t),
                 va_arg(args, size_t));
-            break;           
+            break;   
+        case CTX_1VALTYPE:
+            fprintf(
+                stderr,
+                "Got token type %s",
+                getValueTypeString(va_arg(args, ValueType)));
+                break;        
     }
     va_end(args);
     exit(1);

@@ -86,6 +86,7 @@ void cleanEnv(Environment *env) {
     uint16_t count = 0;
     HASH_ITER(hh, env->var_table, cur, tmp) {
         count++;
+        freeValueKeepStrings(cur->value);
         HASH_DEL(env->var_table, cur);
         free(cur);  
     }
@@ -132,6 +133,27 @@ void addUnsetVarToHash(Environment *env, char* var_name) {
     HASH_ADD_KEYPTR(hh, env->var_table, var_hash_item->var_name, strlen(var_hash_item->var_name), var_hash_item);
 }
 
+void addArrayVarToHash(Environment *env, char* var_name, size_t members) {
+    VarEntry *var_hash_item = findVarEntry(env, var_name).var;
+    if(var_hash_item) raiseError(ERR_ALREADY_ASSIGNED_VAR);
+    var_hash_item = malloc(sizeof(VarEntry));
+    var_hash_item->var_name = var_name;
+    var_hash_item->final = false;
+    //init the array
+    var_hash_item->value.val_arr.len = members;
+    var_hash_item->value.type = VAL_ARRAY;
+    ValueType member_type = getVarTypeFromName(var_name);
+    if(member_type == VAL_STRING) raiseError(ERR_ARRAY_OF_STRINGS);
+    var_hash_item->value.val_arr.member_type = member_type;
+    Value* value_array = malloc(sizeof(Value) * members);
+    //init all members to unset
+    for(size_t i = 0; i < members; i++) {
+        value_array[i] = VALUE_UNSET;
+    }
+    var_hash_item->value.val_arr.arr = value_array;
+    HASH_ADD_KEYPTR(hh, env->var_table, var_hash_item->var_name, strlen(var_hash_item->var_name), var_hash_item);
+}
+
 void finalizeVar(Environment *env, char* var_name) {
     VarEntry *entry = findVarEntry(env, var_name).var;
     if(!entry) raiseError(ERR_UNASSIGNED_VAR);
@@ -159,11 +181,35 @@ void updateVarValue(Environment *env, char* var_name, Value new_val) {
     entry->value = new_val_copy;
 }
 
+void updateVarValueAtIndex(Environment *env, char* var_name, Value new_val, size_t index) {
+    VarEntry *entry = findVarEntry(env, var_name).var; //don't need owner here because nothing will be alloced
+    if(!entry) raiseError(ERR_UNASSIGNED_VAR);
+    if(entry->final) raiseError(ERR_MODIFY_FINAL_VAR);
+    if(entry->value.type != VAL_ARRAY) raiseErrorWithCtx(ERR_NOT_ARRAY, CTX_1VALTYPE, entry->value.type);
+    if(entry->value.val_arr.len <= index) raiseError(ERR_INDEX_OUT_OF_RANGE);
+    if(entry->value.val_arr.member_type != new_val.type) raiseError(ERR_MISMATCH_PREFIX);
+    //actual reassignment
+    entry->value.val_arr.arr[index] = new_val;
+
+}
+
 
 Value getVarValue(Environment *env, char* var_name) {
     VarEntry *tmp = findVarEntry(env, var_name).var;
     if(!tmp) raiseError(ERR_UNASSIGNED_VAR);
     Value ret = tmp->value;
+    return ret;
+}
+
+Value getVarArrayValueAtPos(Environment *env, char* var_name, size_t index) {
+    //handle error cases
+    VarEntry *lookup = findVarEntry(env, var_name).var;
+    if(!lookup) raiseError(ERR_UNASSIGNED_VAR);
+    if(lookup->value.type != VAL_ARRAY) {
+        raiseErrorWithCtx(ERR_NOT_ARRAY, CTX_1VALTYPE, lookup->value.type);
+    }
+    if(lookup->value.val_arr.len <= index) raiseError(ERR_INDEX_OUT_OF_RANGE);
+    Value ret = lookup->value.val_arr.arr[index];
     return ret;
 }
 

@@ -27,6 +27,7 @@ const char* getValueTypeString(ValueType v) {
         case VAL_BOOL:      return "VAL_BOOL";
         case VAL_STRING:    return "VAL_STRING";
         case VAL_CHAR:      return "VAL_CHAR";
+        case VAL_ARRAY:     return "VAL_ARRAY";
         case VAL_VOID:      return "VAL_VOID";
         case VAL_INVALID:   return "VAL_INVALID";
         case VAL_UNSET:     return "VAL_UNSET";
@@ -42,8 +43,17 @@ static void catchInvalidMath(ValueType left, ValueType right) {
 }
 
 void freeValue(Value in) {
-    if(in.type == VAL_STRING) {
-        free(in.val_str);
+    switch(in.type) {
+        case VAL_STRING:    free(in.val_str);       break;
+        case VAL_ARRAY:     free(in.val_arr.arr);   break;
+        default:                                    break;
+    }
+}
+
+void freeValueKeepStrings(Value in) {
+    switch(in.type) {
+        case VAL_ARRAY: free(in.val_arr.arr);       break;
+        default:                                    break;
     }
 }
 
@@ -141,6 +151,8 @@ bool isTruthy(Value val) {
             return (val.val_char);
         case(VAL_STRING):
             return (val.val_str); //if a pointer has been set, it is truthy
+        case(VAL_ARRAY):
+            return true;        //TODO: more complete logic
         case(VAL_VOID):
             return false;
         case(VAL_UNSET):
@@ -164,6 +176,7 @@ bool isTruthy(Value val) {
         case(VAL_STRING): raiseError(ERR_MATH_ON_STR);                              \
         case(VAL_UNSET):   raiseError(ERR_REF_UNSET);                               \
         case(VAL_VOID):     raiseError(ERR_OP_ON_VOID);                             \
+        case(VAL_ARRAY):    raiseError(ERR_MATH_ON_ARRAY);                          \
         case(VAL_INVALID): raiseError(ERR_INVALID_NUM); exit(1);                    \
     }
 

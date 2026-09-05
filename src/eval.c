@@ -35,6 +35,16 @@ Value eval(TreeNode *node, Environment *env, FunctionEntry *fun_hash) {
             addValToEnv(env, out); //ensure the value is added to the hash to properly be cleaned
             return out;
         case(NODE_VAR_REFERENCE):
+            //parse indexed reference first
+            if(node->var_reference.has_index) {
+                logEval(
+                    "Evaluating indexed var reference for var %s, index %zu", 
+                    node->var_reference.name, 
+                    node->var_reference.index
+                );
+                Value index_val = getVarArrayValueAtPos(env, node->var_reference.name, node->var_reference.index);
+                return index_val;
+            }
             //if var exists, send the value
             Value var_val = getVarValue(env, node->var_reference.name);
             char var_val_str[VAL_STR_LEN];
@@ -84,6 +94,11 @@ Value eval(TreeNode *node, Environment *env, FunctionEntry *fun_hash) {
             return ret;
         
         case(NODE_VAR_ASSIGN):
+            if(node->var_assign.array) { //handle array dec
+                if(node->var_assign.final) raiseError(ERR_UNSET_FINAL);
+                addArrayVarToHash(env, node->var_assign.name, node->var_assign.array_size);
+                return VALUE_VOID;
+            }
             if(!node->var_assign.set) { //handle declare without set
                 if(node->var_assign.final) raiseError(ERR_UNSET_FINAL); //can't declare final as unset
                 addUnsetVarToHash(env, node->var_assign.name); //varname owned by tree still
@@ -100,6 +115,10 @@ Value eval(TreeNode *node, Environment *env, FunctionEntry *fun_hash) {
             break;
         case(NODE_VAR_REASSIGN):
             Value reassign = eval(node->var_reassign.val, env, fun_hash);
+            if(node->var_reassign.has_index) {
+                updateVarValueAtIndex(env, node->var_reassign.name, reassign, node->var_reassign.index);
+                return VALUE_VOID;
+            }
             updateVarValue(env, node->var_reassign.name, reassign);
             char reassign_str[VAL_STR_LEN];
             valueToString(reassign, reassign_str, VAL_STR_LEN);

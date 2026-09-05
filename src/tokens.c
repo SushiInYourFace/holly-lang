@@ -36,7 +36,7 @@ static const KeywordEntry keywords[] = {
 
 //any token that stores a number rather than a pointer to a string
 static const TokenType non_string_tokens[] = {
-    TK_INTEGER, TK_DOUBLE, TK_BOOL, TK_CHAR
+    TK_INTEGER, TK_DOUBLE, TK_BOOL, TK_CHAR, TK_ARRAY_INDEX
 };
 #define NUM_NONSTRING_TOKENS (sizeof(non_string_tokens) /sizeof(non_string_tokens[0]))
 
@@ -158,6 +158,11 @@ Token nextTokenData(Cursor *cur) {
             }
             return NULL_STRING_TK(TK_EQ);
         //longer token types
+        case '[':
+            advPastInt(cur);
+            if(advance(cur) != ']') raiseError(ERR_IMPROPER_ARR_INDEX); //make sure index was closed
+            size_t len = rangeToInt(cur, (Range){start + 1, cur->pos - 1});
+            return (Token){TK_ARRAY_INDEX, .integer = len};
         case '\'':
             //char
             char ret = advPastCharDec(cur);

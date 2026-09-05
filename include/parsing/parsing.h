@@ -93,13 +93,19 @@ struct TreeNode {
             char* name;
             bool final;
             bool set;
+            bool array;
+            size_t array_size;
             TreeNode* val;
         } var_assign;
         struct {
             char* name;
+            bool has_index;
+            size_t index;
         } var_reference;
         struct {
             char* name;
+            bool has_index;
+            size_t index;
             TreeNode* val;
         } var_reassign;
         struct {

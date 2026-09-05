@@ -32,6 +32,7 @@ const char* getTokenString(TokenType t) {
         case TK_INTEGER:        return "TK_INTEGER";
         case TK_LPAREN:         return "TK_LPAREN";
         case TK_RPAREN:         return "TK_RPAREN";
+        case TK_ARRAY_INDEX:    return "TK_ARRAY_INDEX";
         case TK_IDENT:          return "TK_IDENT";
         case TK_DOUBLE:         return "TK_DOUBLE";
         case TK_STRING:         return "TK_STRING";
